@@ -10,7 +10,7 @@
     <h2>1.持たせたい機能</h2>
     <h2>2.SDカード内ディレクトリ構造</h2>
         <div style="margin-left: 10px;">
-
+            おやよう
         </div>
     <h2>3.原価</h2>
     <div style="margin-left: 10px;">

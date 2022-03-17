@@ -38,15 +38,16 @@ void printDetail(uint8_t type, int value); //8ビットの符号なし整数型
 /*******************************************************************
 変数宣言
 ********************************************************************/
-double photoanalogValue;//フォトトランジスタアナログ変換した値を保持する変数
-struct tm timeInfo;//時刻を格納するオブジェクト
-char s[20];//時刻文字格納用
-long brighttimes;//明るさ継続カウント用
-int randamno;//音声ランダム再生用
+double photoanalogValue; //フォトトランジスタアナログ変換した値を保持する変数
+struct tm timeInfo; //時刻を格納するオブジェクト
+char s[20]; //時刻文字格納用
+long brighttimes; //明るさ継続カウント用
+int randamno; //音声ランダム再生用
 //short sdfileall;//SDカード内全ファイル数格納用
 long sdfolderco; //SDカード内再生フォルダ番号格納用
 long sdfileco; //SDカード内再生ファイル番号格納用
-long brightjudgespan;
+long brightjudgespan; //明るさ判定処理間隔時間設定
+long voicelength; //音声再生後待ち時間　最長の音声の時間に合わせて調整
 
 /********************************************************************
 無線LAN設定
@@ -191,8 +192,8 @@ void akarusa(){
  ボイス再生処理
  ****************************************************/
 void voiceplay(){
-  brightjudgespan = 5000; //明るさ判定処理間隔時間設定
-  //最長の音声の時間に合わせて調整
+  brightjudgespan = 1000; //明るさ判定処理間隔時間設定
+  voicelength = 5000;  //音声再生後待ち時間　最長の音声の時間に合わせて調整
 
   Serial.println(timeInfo.tm_hour);
   Serial.println("時台です");
@@ -217,7 +218,7 @@ void voiceplay(){
         myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
         Serial.println(F("明るさ検知1回目なので音声再生しました"));
 
-        delay(brightjudgespan); //n秒以内は次の判定しない
+        delay(voicelength); //n秒以内は次の判定しない
 
       }else if(brighttimes == 5){
         myDFPlayer.playFolder(90, 0); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
@@ -227,7 +228,7 @@ void voiceplay(){
         Serial.println(F("明るさ継続回数"));
         Serial.println(brighttimes);
 
-        delay(brightjudgespan); //n秒以内は次の判定しない
+        delay(voicelength); //n秒以内は次の判定しない
 
       } else {
 

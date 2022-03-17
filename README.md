@@ -2,7 +2,7 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <title>ESP32_HIEYUKARISAN</title>
+        <!--<title>ESP32_HIEYUKARISAN</title>-->
     </head> 
 <body>
     <h1>ひえゆかりさん制作</h1>

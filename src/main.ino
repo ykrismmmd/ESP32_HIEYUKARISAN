@@ -70,13 +70,13 @@ bool wifiConfigWithSD(fs::FS &fs, const char *path) {
   }
   while (file.available()) {
     String line = file.readStringUntil('\n'); //改行"\n"で1行終了
-    line = line.substring(0, line.indexOf('#')); //
-    String ssid = line.substring(0, line.indexOf(' ')); ssid.trim();
-    String password = line.substring(line.indexOf(' ')); password.trim();
+    line = line.substring(0, line.indexOf('#')); //0文字目が#だったら以降を変数lineに格納する
+    String ssid = line.substring(0, line.indexOf(' ')); ssid.trim(); //C++ 0文字目から半角スペースまでの文字を切り出す
+    String password = line.substring(line.indexOf(' ')); password.trim(); //c++ 半角スペースから始まる文字列を切り出す
     if (ssid.length() != 0) {
       log_d("WiFiMulti += SSID: %s", ssid.c_str());
       Serial.println(F("SSIDの読み込みに成功しました"));
-      wifiMulti.addAP(ssid.c_str(), password.c_str());
+      wifiMulti.addAP(ssid.c_str(), password.c_str()); //WifimultiモジュールのaddAPにSSIDとpasswordを渡す
     }
   }
 
@@ -140,7 +140,7 @@ void setup()
   }
   Serial.println(F("DFPlayer Miniの起動に成功しました")); //dfplayer起動成功
 
-  myDFPlayer.volume(20);  //音量設定. From 0 to 30
+  myDFPlayer.volume(25);  //音量設定. From 0 to 30
 
 /**************************************************************************************************************/
 

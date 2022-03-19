@@ -17,9 +17,27 @@
             <table>
                 <tr>
                     <td>カレント</td>
-                    <td>セカンド</td>
-                    <td>サード</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td colspan="12">音声</td>
+                </tr>
+                <tr>
+                    <td>カレント</td>
+                    <td>フォルダ</td>
+                    <td>ファイル形式</td>
                     <td>定義</td>
+                    <td>１</td>
+                    <td>２</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>8</td>
+                    <td>9</td>
+                    <td>10</td>
+                    <td>11</td>
                 </tr>
                 <tr>
                     <td>root(SD:)</td>

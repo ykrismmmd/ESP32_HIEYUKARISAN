@@ -16,7 +16,7 @@
         <div style="margin-left: 10px;">
             <table>
                 <tr>
-                    <td>カレント</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>

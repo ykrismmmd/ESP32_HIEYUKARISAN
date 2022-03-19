@@ -118,8 +118,14 @@
                 <td>ヤハタ</td>
             </tr>
             <tr>
+                <td>9V角電池</td>
+                <td>110</td>
+                <td>ダイソー</td>
+                <td></td>
+            </tr>
+            <tr>
                 <td>合計</td>
-                <td>2341</td>
+                <td>2441</td>
                 <td></td>
                 <td></td>
             </tr>

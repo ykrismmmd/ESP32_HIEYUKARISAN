@@ -122,6 +122,11 @@
                 <td>110</td>
                 <td>ダイソー</td>
                 <td></td>
+            </tr>            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
             <tr>
                 <td>合計</td>

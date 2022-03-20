@@ -303,10 +303,10 @@
                 <td>ダイソー</td>
                 <td></td>
             </tr>            <tr>
+                <td>XHコネクタ（候補）</td>
                 <td></td>
                 <td></td>
-                <td></td>
-                <td></td>
+                <td>https://www.jst-mfg.com/product/pdf/jpn/XH.pdf?236dc0b5906d</td>
             </tr>
             <tr>
                 <td>合計</td>

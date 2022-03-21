@@ -5,6 +5,7 @@
         <!--<title>ESP32_HIEYUKARISAN</title>-->
     </head> 
 <body>
+    <img src="media/image/PXL_20220318_112853861.MP.jpg">
     <h1>ひえゆかりさん制作test</h1>
     <h2>0.妄想</h2>
     <h3>(1)冷蔵庫の中に置いておき、扉を開けると明るさ変化を検知する。</h3>

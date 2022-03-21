@@ -308,6 +308,12 @@
                 <td></td>
                 <td>https://www.jst-mfg.com/product/pdf/jpn/XH.pdf?236dc0b5906d</td>
             </tr>
+            </tr>            <tr>
+                <td>フォトトランジスタ</td>
+                <td>50</td>
+                <td>マルツ</td>
+                <td>NJL 7502L https://akizukidenshi.com/catalog/g/gI-02325/</td>
+            </tr>
             <tr>
                 <td>合計</td>
                 <td>2441</td>

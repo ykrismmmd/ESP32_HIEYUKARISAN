@@ -215,10 +215,10 @@
                 <td>454/2 送料込み</td>
             </tr>
             <tr>
-                <td>tfカードリーダ</td>
-                <td>101</td>
-                <td>Aliexpress</td>
-                <td>送料込み</td>
+                <td><s>tfカードリーダ<s></td>
+                <td><s>101<s></td>
+                <td><s>Aliexpress<s></td>
+                <td><s>送料込み<s></td>
             </tr>
             <tr>
                 <td>DC-DCコンバータ</td>

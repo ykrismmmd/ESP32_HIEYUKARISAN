@@ -121,7 +121,7 @@ void setup()
 {
   //USB シリアル通信設定
   Serial.begin(115200);//USBシリアルポート速度設定
-  Serial_df.begin(9600);//TFカード通信速度設定
+  //Serial_df.begin(9600);//TFカード通信速度設定
 
   //ピン設定
   pinMode(A6,INPUT); //ADC6(D34)を入力へ　フォトトランジスタ用　NJL7502L
@@ -215,7 +215,7 @@ void random1(){
   /*ランダムテスト*/
   srand((unsigned int)time(NULL)); //乱数を時刻によって初期化
   randamno = rand() % 256; //0～255の乱数を発生
-  Serial.println(F("ランダム値"));
+  Serial.print(F("ランダム値:"));
   Serial.println(randamno); 
   //randamno = strtol(randamno, NULL, 16); //16進数へ変換
   //Serial.println(randamno);
@@ -240,21 +240,21 @@ void voiceplay(){
   brightjudgespan = 1000; //明るさ判定処理間隔時間設定
   voicelength = 5000;  //音声再生後待ち時間　最長の音声の時間に合わせて調整
 
-  Serial.println(timeInfo.tm_hour);
+  Serial.print(timeInfo.tm_hour);
   Serial.println("時台です");
 
     if (photoanalogValue > 3000){ //明るさ判定
       if (brighttimes < 1){//明るい継続判定0回なら処理
 
         sdfileco = myDFPlayer.readFileCountsInFolder(timeInfo.tm_hour);//当該時刻名のフォルダ内にあるファイル数を取得
-        Serial.println(F("ファイル数は"));
+        Serial.print(F("ファイル数:"));
         Serial.println(sdfileco);
 
         delay(100); //Serial.println(sdfileco);とSerial.println(randamno);の印字入れ替わり防止
 
         srand((unsigned int)time(NULL)); //ランダム関数を時刻によって初期化
         randamno = rand() % sdfileco; //0～sdfileco間のランダムな値を生成
-        Serial.println(F("ランダム値は"));
+        Serial.print(F("ランダム値:"));
         Serial.println(randamno);
 
         delay(100);
@@ -311,8 +311,8 @@ void timeview(){
             timeInfo.tm_year + 1900, timeInfo.tm_mon + 1, timeInfo.tm_mday,
             timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);//人間が読める形式に変換
     //delay(1000);
-    Serial.println(F("現在内部時刻は"));//
-    Serial.println(s);//時間をシリアルモニタへ出力
+    Serial.print(F("現在内部時刻は"));//
+    Serial.print(s);//時間をシリアルモニタへ出力
     Serial.println(F("です"));
 }
 

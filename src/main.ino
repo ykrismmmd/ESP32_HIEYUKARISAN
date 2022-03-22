@@ -21,17 +21,26 @@ void printDetail(uint8_t type, int value); //8ビットの符号なし整数型
 /*******************************************************************
 web画面からのWiFi設定用変数宣言
 ********************************************************************/
+//APモードでの初期設定
 IPAddress apIP(192,168,1,100);
 WebServer webServer(80);
 const char* WIFIMGR_ssid = "HIEYUKARI_SETTEI_ESP32"; //APモードでのSSID名
 const char* WIFIMGR_pass = "xxxxxxxx"; //APモードでのパスワード
 DNSServer dnsServer;
 
-// parameters setting
-const String defaultSSID = "myssid"; //初期SSID
-const String defaultPASSWD = "12345678"; //初期パスワード
+//クライアントモードでの初期設定
+const String defaultSSID = "HIEYUKARI"; //初期SSID
+const String defaultPASSWD = "HIEYUKARI"; //初期パスワード
 String ssid = defaultSSID; //ライブラリ変数ssidにdefaultSSIDの値を代入
 String passwd = defaultPASSWD; //ライブラリ変数passwdにdefaultPASSWDの値を代入
+/*
+WiFi環境がない場合は、スマートフォンでテザリングして初期設定する。
+1回wifiをつながないと次の処理が走らない。
+クライアントモード初期SSID、パスワードでテザリングAPを用意してもらい、つないでもらう。
+1回立ち上がればwifiは切断してもよい。
+ただし、再起動した場合は同じ操作が必要になる。
+*/
+
 
 // scan SSID
 #define SSIDLIMIT 30 //ライブラリで定義された変数SSIDLIMITの値を30に設定
@@ -137,12 +146,12 @@ void setup()
     delay(200); // 200ms
     retry ++;
     if (retry > 50) { // 200ms x 50 = 10 sec
-      Serial.println("wifi接続がタイムアウトしました");
+      Serial.println("wifi接続がタイムアウトしました。APモードに切り替えます");
       webconfig(); // enter webconfig
     }
   }
   Serial.println();
-  Serial.printf("接続完了しました, IP address: ");
+  Serial.printf("接続完了しました。IP address: ");
   Serial.println(WiFi.localIP());
   delay(500);
 
@@ -378,7 +387,7 @@ void printdfpDetail(uint8_t type, int value) {
 ****************************************************************/
 void webconfig() {
   
-  Serial.println("WebConfig mode: ");
+  Serial.println("Web設定モード: ");
 
   configserver();
   
@@ -427,11 +436,13 @@ String maskpasswd(String passwd){
 void wifimgr_top() {
 
   String html = Headder_str();
-  html += "<a href='/wifiinput'>WIFI setup</a>";
-  html += "<hr><h3>Current Settings</h3>";
+  html += "<a href='/wifiinput'>WiFi設定開始</a>";
+  html += "<hr><h3>現在の設定</h3>";
   html += "SSID: " + ssid + "<br>";
   html += "passwd: " + maskpasswd(passwd) + "<br>";
-  html += "<hr><p><center><a href='/reboot'>Reboot</a></center>";
+  html += "WiFiによる時刻同期を使用しない<input type=\"checkbox\" name=\"hushiyou\" value=\"hushiyou\"><br>";
+  // valueWiFiによる時刻同期を使用しない<br>";
+  html += "<hr><p><center><a href='/reboot'>設定を適用して再起動</a></center>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
@@ -462,6 +473,7 @@ void InitialConfigFile(){
 
   ssid = defaultSSID;
   passwd = defaultPASSWD;
+  //hushiyou
   
   WriteConfigFile();  
 }
@@ -587,7 +599,7 @@ void reboot() {
 void doreboot() {
   String html = Headder_str();
   html += "<hr><p>";
-  html += "<h3>rebooting</h3><p>";
+  html += "<h3>再起動中</h3><p>";
   html += "The setting WiFi connection will be disconnected...<p>";
   html += "<hr>";
   html += "</body></html>";
@@ -599,3 +611,9 @@ void doreboot() {
   delay(2000); // hold 2 sec
   ESP.restart(); // restart ESP32
 }
+
+/*
+void wifihushiyou{
+  
+}
+*/

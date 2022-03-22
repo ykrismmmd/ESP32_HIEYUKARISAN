@@ -8,12 +8,38 @@
 #include "SD.h" //TFカード取り扱いのためライブラリ読み込み
 #include "FS.h"
 #include "SPI.h" //SPI通信用ライブラリ
+#include "DNSServer.h"
+#include "WebServer.h"
+#include "SPIFFS.h"
 
 //SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 HardwareSerial myHardwareSerial(1);
 HardwareSerial Serial_df(2);
 DFRobotDFPlayerMini myDFPlayer;
 void printDetail(uint8_t type, int value); //8ビットの符号なし整数型
+
+/*******************************************************************
+web画面からのWiFi設定用変数宣言
+********************************************************************/
+IPAddress apIP(192,168,1,100);
+WebServer webServer(80);
+const char* WIFIMGR_ssid = "HIEYUKARI_SETTEI_ESP32"; //APモードでのSSID名
+const char* WIFIMGR_pass = "xxxxxxxx"; //APモードでのパスワード
+DNSServer dnsServer;
+
+// parameters setting
+const String defaultSSID = "myssid"; //初期SSID
+const String defaultPASSWD = "12345678"; //初期パスワード
+String ssid = defaultSSID; //ライブラリ変数ssidにdefaultSSIDの値を代入
+String passwd = defaultPASSWD; //ライブラリ変数passwdにdefaultPASSWDの値を代入
+
+// scan SSID
+#define SSIDLIMIT 30 //ライブラリで定義された変数SSIDLIMITの値を30に設定
+String ssid_rssi_str[SSIDLIMIT]; //30文字まで格納できる配列を定義
+String ssid_str[SSIDLIMIT]; //30文字まで格納できる配列を定義
+
+// SPIFFS config file名設定
+const char* configfile = "/contig.txt";
 
 /*******************************************************************
 変数宣言
@@ -30,9 +56,8 @@ long brightjudgespan; //明るさ判定処理間隔時間設定
 long voicelength; //音声再生後待ち時間　最長の音声の時間に合わせて調整
 
 /********************************************************************
-無線LAN設定
-********************************************************************/
-
+TFカードから無線LAN設定読み込み（不使用）
+*******************************************************************
 WiFiMulti wifiMulti;//wifimultiから関数呼び出し
 
 bool wifiConfigWithSD(fs::FS &fs, const char *path) {
@@ -76,7 +101,9 @@ bool wifiConfigWithSD(fs::FS &fs, const char *path) {
   
   file.close();
   return true;
+  
 }
+*/
 
 /******************************************************************************************************************
 セットアップ
@@ -91,10 +118,39 @@ void setup()
   pinMode(A6,INPUT); //ADC6(D34)を入力へ　フォトトランジスタ用　NJL7502L
   analogSetAttenuation(ADC_11db); //内蔵アッテネータを11dBに、測定範囲0-3.3V
 
+  //SPIFFSマウント
+  if(!SPIFFS.begin(true)){
+    Serial.println(F("SPIFFSマウント失敗"));
+  }else{
+    Serial.println(F("SPIFFSマウント成功"));
+  }
+
+  //SPIFFS領域からreadconfig関数によりssidとpassword読み込み
+  readConfigFile();
+  
+  //webからwifi設定接続処理
+  uint8_t retry = 0;
+  WiFi.begin(ssid.c_str(), passwd.c_str());
+  Serial.print("WiFi接続試行中");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(200); // 200ms
+    retry ++;
+    if (retry > 50) { // 200ms x 50 = 10 sec
+      Serial.println("wifi接続がタイムアウトしました");
+      webconfig(); // enter webconfig
+    }
+  }
+  Serial.println();
+  Serial.printf("接続完了しました, IP address: ");
+  Serial.println(WiFi.localIP());
+  delay(500);
+
   /*あかねちゃんやで*/
 
-  wifiConfigWithSD(SD, "/wifi.txt"); //TFからwifi情報読み込み、接続
+  //wifiConfigWithSD(SD, "/wifi.txt"); //TFからwifi情報読み込み、接続
 
+  //NTPによる時刻同期
   configTime(9 * 3600L, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");//NTPの設定
   Serial.println(F("NTP時刻同期を行いました"));
 
@@ -314,4 +370,232 @@ void printdfpDetail(uint8_t type, int value) {
       break;
   }
 
+}
+
+
+/***************************************************************
+ * webからwifi設定関連
+****************************************************************/
+void webconfig() {
+  
+  Serial.println("WebConfig mode: ");
+
+  configserver();
+  
+  uint8_t configloop = 1;
+  while (configloop == 1) {
+    dnsServer.processNextRequest();
+    webServer.handleClient();
+  }
+
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+}
+
+void configserver() {
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+  delay(100);
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(WIFIMGR_ssid); // no password
+//   WiFi.softAP(WIFIMGR_ssid,WIFIMGR_pass); // with password  
+
+  delay(200); // Important! This delay is necessary 
+  WiFi.softAPConfig(apIP,apIP,IPAddress(255,255,255,0)); 
+
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  dnsServer.start(53, "*", apIP);
+  
+  webServer.on("/", wifimgr_top);
+  webServer.on("/wifiinput", HTTP_GET, wifiinput);
+  webServer.on("/wifiset", HTTP_GET, wifiset);
+  webServer.on("/reboot", reboot);
+  webServer.on("/doreboot", doreboot);
+  webServer.onNotFound(wifimgr_top);
+  webServer.begin();
+}
+
+String maskpasswd(String passwd){
+  String maskpasswd = "";
+
+  for (int i=0; i<passwd.length(); i++) maskpasswd = maskpasswd + "*";
+  if (passwd.length() == 0) maskpasswd = "(null)";
+
+  return maskpasswd;
+}
+
+void wifimgr_top() {
+
+  String html = Headder_str();
+  html += "<a href='/wifiinput'>WIFI setup</a>";
+  html += "<hr><h3>Current Settings</h3>";
+  html += "SSID: " + ssid + "<br>";
+  html += "passwd: " + maskpasswd(passwd) + "<br>";
+  html += "<hr><p><center><a href='/reboot'>Reboot</a></center>";
+  html += "</body></html>";
+  webServer.send(200, "text/html", html);
+}
+
+String Headder_str() {
+  String html = "";
+  html += "<!DOCTYPE html><html><head>";
+  html += "<meta name='viewport' content='width=device-width, initial-scale=1.3'>";
+  html += "<meta http-equiv='Pragma' content='no-cache'>";
+  html += "<meta http-equiv='Cache-Control' content='no-cache'></head>";
+  html += "<meta http-equiv='Expires' content='0'>";
+  html += "<style>";
+  html += "a:link, a:visited { background-color: #009900; color: white; padding: 5px 15px;";
+  html += "text-align: center; text-decoration: none;  display: inline-block;}";
+  html += "a:hover, a:active { background-color: green;}";
+  html += "bo32{ background-color: #EEEEEE;}";
+  html += "input[type=button], input[type=submit], input[type=reset] {";
+  html += "background-color: #000099;  border: none;  color: white;  padding: 5px 20px;";
+  html += "text-decoration: none;  margin: 4px 2px;";
+  html += "</style>";
+  html += "<body>"; 
+  html += "<h2>WIFIMGR</h2>";
+  return html;
+}
+
+void InitialConfigFile(){
+  Serial.printf("SPIFFS initial file: %s\n", configfile);
+
+  ssid = defaultSSID;
+  passwd = defaultPASSWD;
+  
+  WriteConfigFile();  
+}
+
+//*******************************************
+void WriteConfigFile(){
+
+  ssid.trim();
+  passwd.trim();
+  
+  Serial.printf("SPIFFS writing file: %s\n", configfile);
+  File fw = SPIFFS.open(configfile, "w");
+  fw.println(ssid);
+  fw.println(passwd);
+  fw.close();
+
+  delay(100);
+}
+
+//*******************************************
+void readConfigFile(){
+  String numstr;
+  Serial.printf("SPIFFS reading file: %s\n", configfile);
+  File fr = SPIFFS.open(configfile, "r");
+  if (fr) {
+    ssid = fr.readStringUntil('\n');
+    ssid.trim();
+    if (ssid =="") ssid = defaultSSID;
+    passwd = fr.readStringUntil('\n');
+    passwd.trim();
+    if (passwd == "" && ssid == defaultSSID) passwd = defaultPASSWD;
+    
+    fr.close();
+
+  } else {
+    //InitialConfigFile
+    Serial.println("read open error");
+    Serial.print("SPIFFS data seems clash. Default load...");
+    InitialConfigFile();
+  }
+  
+}
+
+void wifiinput() {
+  String html = Headder_str();
+  html += "<a href='/'>TOP</a> ";
+  html += "<hr><p>";
+  html += "<h3>WiFi Selector</h3>";
+  html += WIFI_Form_str();
+  html += "<br><hr><p><center><a href='/'>Cancel</a></center>";
+  html += "</body></html>";
+  webServer.send(200, "text/html", html);
+}
+
+//*******************************************
+String WIFI_Form_str(){
+
+  Serial.println("wifi scan start");
+
+  // WiFi.scanNetworks will return the number of networks found
+  uint8_t ssid_num = WiFi.scanNetworks();
+  Serial.println("scan done\r\n");
+  
+  if (ssid_num == 0) {
+    Serial.println("no networks found");
+  } else {
+    Serial.printf("%d networks found\r\n\r\n", ssid_num);
+    if (ssid_num > SSIDLIMIT) ssid_num = SSIDLIMIT;
+    for (int i = 0; i < ssid_num; ++i) {
+      ssid_str[i] = WiFi.SSID(i);
+      String wifi_auth_open = ((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+      ssid_rssi_str[i] = ssid_str[i] + " (" + WiFi.RSSI(i) + "dBm)" + wifi_auth_open;
+      ssid_rssi_str[i] = ssid_str[i] + wifi_auth_open;
+      Serial.printf("%d: %s\r\n", i, ssid_rssi_str[i].c_str());
+      delay(10);
+    }
+  }
+  
+  String str = "";
+  str += "<form action='/wifiset' method='get'>";
+  str += "<select name='ssid' id ='ssid'>";
+  for(int i=0; i<ssid_num; i++){
+    str += "<option value=" + ssid_str[i] + ">" + ssid_rssi_str[i] + "</option>";
+  }
+  str += "<option value=" + ssid + ">" + ssid + "(current)</option>";
+  if (ssid != defaultSSID){
+    str += "<option value=" + defaultSSID + ">" + defaultSSID + "(default)</option>";
+  }
+  str += "</select><br>\r\n";
+  str += "Password<br><input type='password' name='passwd' value='" + passwd + "'>";
+  str += "<br><input type='submit' value='set'>";
+  str += "</form><br>";
+  str += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
+  return str;
+}
+
+
+void wifiset(){
+  
+  ssid = webServer.arg("ssid");
+  passwd = webServer.arg("passwd");
+  ssid.trim();
+  passwd.trim();
+ 
+  WriteConfigFile();
+  
+  // 「/」に転送
+  webServer.sendHeader("Location", String("/"), true);
+  webServer.send(302, "text/plain", "");
+}
+
+void reboot() {
+  String html = Headder_str();
+  html += "<hr><p>";
+  html += "<h3>reboot confirmation</h3><p>";
+  html += "Are you sure to reboot?<p>";
+  html += "<center><a href='/doreboot'>YES</a> <a href='/'>no</a></center>";
+  html += "<p><hr>";
+  html += "</body></html>";
+  webServer.send(200, "text/html", html);
+}
+
+void doreboot() {
+  String html = Headder_str();
+  html += "<hr><p>";
+  html += "<h3>rebooting</h3><p>";
+  html += "The setting WiFi connection will be disconnected...<p>";
+  html += "<hr>";
+  html += "</body></html>";
+  webServer.send(200, "text/html", html);
+
+  // reboot esp32
+  Serial.println("reboot esp32 now.");
+    
+  delay(2000); // hold 2 sec
+  ESP.restart(); // restart ESP32
 }

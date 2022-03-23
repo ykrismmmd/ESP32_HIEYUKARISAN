@@ -158,7 +158,6 @@ void setup()
 
 /**************************************************************************************************************/
 
-
   //SPIFFSマウント
   if(!SPIFFS.begin(true)){
     Serial.println(F("SPIFFSマウント失敗しました"));
@@ -470,7 +469,7 @@ void wifimgr_top() {
   html += "<hr><h3>現在の設定</h3>";
   html += "SSID: " + ssid + "<br>";
   html += "passwd: " + maskpasswd(passwd) + "<br>";
-  html += "WiFiによる時刻同期を使用しない<input type=\"checkbox\" name=\"hushiyou\" value=\"hushiyou\"><br>";
+  //html += "WiFiによる時刻同期を使用しない<input type=\"checkbox\" name=\"hushiyou\" value=\"hushiyou\"><br>";
   // valueWiFiによる時刻同期を使用しない<br>";
   html += "<hr><p><center><a href='/reboot'>設定を適用して再起動</a></center>";
   html += "</body></html>";
@@ -549,11 +548,11 @@ void readConfigFile(){
 
 void wifiinput() {
   String html = Headder_str();
-  html += "<a href='/'>TOP</a> ";
+  html += "<a href='/'>設定メニューへ戻る</a> ";
   html += "<hr><p>";
-  html += "<h3>WiFi Selector</h3>";
+  html += "<h3>WiFiアクセスポイント設定</h3>";
   html += WIFI_Form_str();
-  html += "<br><hr><p><center><a href='/'>Cancel</a></center>";
+  html += "<br><hr><p><center><a href='/'>キャンセル</a></center>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
@@ -583,6 +582,7 @@ String WIFI_Form_str(){
   }
   
   String str = "";
+  str += "SSID<br>";
   str += "<form action='/wifiset' method='get'>";
   str += "<select name='ssid' id ='ssid'>";
   for(int i=0; i<ssid_num; i++){
@@ -594,7 +594,7 @@ String WIFI_Form_str(){
   }
   str += "</select><br>\r\n";
   str += "Password<br><input type='password' name='passwd' value='" + passwd + "'>";
-  str += "<br><input type='submit' value='set'>";
+  str += "<br><input type='submit' value='設定'>";
   str += "</form><br>";
   str += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
   return str;
@@ -618,9 +618,9 @@ void wifiset(){
 void reboot() {
   String html = Headder_str();
   html += "<hr><p>";
-  html += "<h3>reboot confirmation</h3><p>";
-  html += "Are you sure to reboot?<p>";
-  html += "<center><a href='/doreboot'>YES</a> <a href='/'>no</a></center>";
+  html += "<h3>再起動実行確認</h3><p>";
+  html += "再起動してよろしいですか?<p>";
+  html += "<center><a href='/doreboot'>はい</a> <a href='/'>いいえ</a></center>";
   html += "<p><hr>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);

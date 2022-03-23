@@ -127,42 +127,6 @@ void setup()
   pinMode(A6,INPUT); //ADC6(D34)を入力へ　フォトトランジスタ用　NJL7502L
   analogSetAttenuation(ADC_11db); //内蔵アッテネータを11dBに、測定範囲0-3.3V
 
-  //SPIFFSマウント
-  if(!SPIFFS.begin(true)){
-    Serial.println(F("SPIFFSマウント失敗"));
-  }else{
-    Serial.println(F("SPIFFSマウント成功"));
-  }
-
-  //SPIFFS領域からreadconfig関数によりssidとpassword読み込み
-  readConfigFile();
-  
-  //webからwifi設定接続処理
-  uint8_t retry = 0;
-  WiFi.begin(ssid.c_str(), passwd.c_str());
-  Serial.print("WiFi接続試行中");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    delay(200); // 200ms
-    retry ++;
-    if (retry > 50) { // 200ms x 50 = 10 sec
-      Serial.println("wifi接続がタイムアウトしました。APモードに切り替えます");
-      webconfig(); // enter webconfig
-    }
-  }
-  Serial.println();
-  Serial.printf("接続完了しました。IP address: ");
-  Serial.println(WiFi.localIP());
-  delay(500);
-
-  /*あかねちゃんやで*/
-
-  //wifiConfigWithSD(SD, "/wifi.txt"); //TFからwifi情報読み込み、接続
-
-  //NTPによる時刻同期
-  configTime(9 * 3600L, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");//NTPの設定
-  Serial.println(F("NTP時刻同期を行いました"));
-
 /*DFPlayemini設定*************************************************************************************************/
   //DFplayer mini とのシリアル通信設定
   myHardwareSerial.begin(9600, SERIAL_8N1, 14, 12); //14番ピンがRX,12番ピンがTX
@@ -187,8 +151,74 @@ void setup()
 
   myDFPlayer.volume(25);  //音量設定. From 0 to 30
 
+  myDFPlayer.playFolder(99, 0); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+  myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+
+  delay(4000);//音声再生完了待ち
+
 /**************************************************************************************************************/
 
+
+  //SPIFFSマウント
+  if(!SPIFFS.begin(true)){
+    Serial.println(F("SPIFFSマウント失敗しました"));
+    myDFPlayer.playFolder(99, 1); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+    myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+    delay(4000);//音声再生完了待ち
+  }else{
+    Serial.println(F("SPIFFSマウント成功しました"));
+    myDFPlayer.playFolder(99, 2); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+    myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+    delay(4000);//音声再生完了待ち
+  }
+
+  //SPIFFS領域からreadconfig関数によりssidとpassword読み込み
+  readConfigFile();
+  
+  //webからwifi設定接続処理
+  uint8_t retry = 0;
+  WiFi.begin(ssid.c_str(), passwd.c_str());
+  Serial.print("WiFi接続試行中です");
+  myDFPlayer.playFolder(99, 3); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+  myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+  delay(3000);//音声再生完了待ち
+
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(200); // 200ms
+    retry ++;
+    if (retry > 50) { // 200ms x 50 = 10 sec
+      Serial.println("wifi接続がタイムアウトしました。APモードに切り替えます");
+      myDFPlayer.playFolder(99, 4); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+      myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+      webconfig(); // enter webconfig
+    }
+  }
+  Serial.println();
+  Serial.printf("WiFi接続完了しました。IP address: ");
+  Serial.println(WiFi.localIP());
+  myDFPlayer.playFolder(99, 5); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+  myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+  delay(3000);//音声再生完了待ち
+
+  delay(500);
+
+  /*あかねちゃんやで*/
+
+  //wifiConfigWithSD(SD, "/wifi.txt"); //TFからwifi情報読み込み、接続
+
+  //NTPによる時刻同期
+  configTime(9 * 3600L, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");//NTPの設定
+  Serial.println(F("NTP時刻同期を行いました"));
+  myDFPlayer.playFolder(99, 6); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+  myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+  delay(3000);//音声再生完了待ち
+
+  //起動完了メッセージ
+  Serial.println(F("起動完了しました"));
+  myDFPlayer.playFolder(99, 7); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
+  myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
+  delay(3000);//音声再生完了待ち
 }
 
 /****************************************************

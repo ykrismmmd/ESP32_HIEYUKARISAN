@@ -5,12 +5,12 @@
 #include "Time.h" //時刻を取り扱うライブラリ読み込み
 #include "WiFi.h" //WiFiライブラリ読み込み
 #include "WiFiMulti.h" //WfFiMultiライブラリ読み込み
-#include "SD.h" //TFカード取り扱いのためライブラリ読み込み
+//#include "SD.h" //TFカード取り扱いのためライブラリ読み込み
 #include "FS.h"
 #include "SPI.h" //SPI通信用ライブラリ
-#include "DNSServer.h"
-#include "WebServer.h"
-#include "SPIFFS.h"
+#include "DNSServer.h" //web画面用ライブラリ
+#include "WebServer.h" //web画面用ライブラリ
+#include "SPIFFS.h" //SPIFFS領域取り扱い用ライブラリ
 
 //SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 HardwareSerial myHardwareSerial(1);

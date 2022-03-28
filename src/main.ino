@@ -132,7 +132,7 @@ void setup()
   myHardwareSerial.begin(9600, SERIAL_8N1, 14, 12); //14番ピンがRX,12番ピンがTX
 
   //USBシリアルにメッセージ印字
-  Serial.println();
+  Serial.println(); //改行
   //Serial.println(F("DFRobot DFPlayer Mini Demo")); //(F(を指定するとSRAMじゃなくてフラッシュメモリに格納する
   Serial.println(F("DFPlayerを開始しています (3~5secかかることがあります)"));
 

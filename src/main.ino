@@ -5,7 +5,6 @@
 #include "Time.h" //時刻を取り扱うライブラリ読み込み
 #include "WiFi.h" //WiFiライブラリ読み込み
 #include "WiFiMulti.h" //WfFiMultiライブラリ読み込み
-//#include "SD.h" //TFカード取り扱いのためライブラリ読み込み
 #include "FS.h"
 #include "SPI.h" //SPI通信用ライブラリ
 #include "DNSServer.h" //web画面用ライブラリ
@@ -58,9 +57,8 @@ struct tm timeInfo; //時刻を格納するオブジェクト
 char s[20]; //時刻文字格納用
 long brighttimes; //明るさ継続カウント用
 int randamno; //音声ランダム再生用
-//short sdfileall;//SDカード内全ファイル数格納用
-long sdfolderco; //SDカード内再生フォルダ番号格納用
-long sdfileco; //SDカード内再生ファイル番号格納用
+long sdfolderco; //TFカード内再生フォルダ番号格納用
+long sdfileco; //TFカード内再生ファイル番号格納用
 long brightjudgespan; //明るさ判定処理間隔時間設定
 long voicelength; //音声再生後待ち時間　最長の音声の時間に合わせて調整
 
@@ -426,16 +424,16 @@ void webconfig() {
     webServer.handleClient();
   }
 
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
+  WiFi.disconnect(true); //wifi切断
+  WiFi.mode(WIFI_OFF); //wifi無効化
 }
 
 void configserver() {
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
+  WiFi.disconnect(true); //wifi切断
+  WiFi.mode(WIFI_OFF); //wifi無効化
   delay(100);
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(WIFIMGR_ssid); // no password
+  WiFi.mode(WIFI_AP); //wifi APモードで起動
+  WiFi.softAP(WIFIMGR_ssid); // パスワードなしで起動
 //   WiFi.softAP(WIFIMGR_ssid,WIFIMGR_pass); // with password  
 
   delay(200); // Important! This delay is necessary 

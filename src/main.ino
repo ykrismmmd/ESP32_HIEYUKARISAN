@@ -10,6 +10,7 @@
 #include "DNSServer.h" //web画面用ライブラリ
 #include "WebServer.h" //web画面用ライブラリ
 #include "SPIFFS.h" //SPIFFS領域取り扱い用ライブラリ
+#include "LiquidCrystal_I2C.h" //I2CLCD取り扱い用ライブラリ
 
 //SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 HardwareSerial myHardwareSerial(1);

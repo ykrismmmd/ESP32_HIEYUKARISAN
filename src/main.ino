@@ -24,7 +24,7 @@ web画面からのWiFi設定用変数宣言
 IPAddress apIP(192,168,1,100);
 WebServer webServer(80);
 const char* WIFIMGR_ssid = "HIEYUKARI_SETTEI_ESP32"; //APモードでのSSID名
-const char* WIFIMGR_pass = "xxxxxxxx"; //APモードでのパスワード
+const char* WIFIMGR_pass = "xxxxxxxx"; //APモードでのパスワードWiFi.softAP(WIFIMGR_ssid)にてパスワードなしで起動するので適当な文字列でok
 DNSServer dnsServer;
 
 //クライアントモードでの初期設定
@@ -61,56 +61,6 @@ long sdfolderco; //TFカード内再生フォルダ番号格納用
 long sdfileco; //TFカード内再生ファイル番号格納用
 long brightjudgespan; //明るさ判定処理間隔時間設定
 long voicelength; //音声再生後待ち時間　最長の音声の時間に合わせて調整
-
-/********************************************************************
-TFカードから無線LAN設定読み込み（不使用）
-*******************************************************************
-WiFiMulti wifiMulti;//wifimultiから関数呼び出し
-
-bool wifiConfigWithSD(fs::FS &fs, const char *path) {
-  //wifiConfigWithSD(SD, "/wifi.txt"); の"/wifi.txt"という文字列をポインタで定義
-  //pathを指定したら、変数pathの中身を見るのではなく、*pathで指定されている/wifi.txtを直接参照する
-  //File file = fs.open(path, "r");
-
-  SD.begin(); //TFカード通信開始
-
-  File file = fs.open(path);
-  if (!file) { //ファイルエラーが有る場合
-    log_e("Can't Open File %s", path);
-    Serial.println(F("wifi設定ファイルを開けませんでした"));
-    return false;
-  }
-  while (file.available()) {
-    String line = file.readStringUntil('\n'); //改行"\n"で1行終了
-    line = line.substring(0, line.indexOf('#')); //0文字目が#だったら以降を変数lineに格納する
-    String ssid = line.substring(0, line.indexOf(' ')); ssid.trim(); //C++ 0文字目から半角スペースまでの文字を切り出す
-    String password = line.substring(line.indexOf(' ')); password.trim(); //c++ 半角スペースから始まる文字列を切り出す
-    if (ssid.length() != 0) {
-      log_d("WiFiMulti += SSID: %s", ssid.c_str());
-      Serial.println(F("SSIDの読み込みに成功しました"));
-      wifiMulti.addAP(ssid.c_str(), password.c_str()); //WifimultiモジュールのaddAPにSSIDとpasswordを渡す
-    }
-  }
-
-  WiFi.mode(WIFI_STA); //Wifi子局モード
-
-  log_i("WiFiMulti Connecting...");
-  Serial.println(F("WiFiMulti接続試行中"));
-
-  if (wifiMulti.run() != WL_CONNECTED) {
-    log_e("WiFi Connection Failed :(");
-    Serial.println(F("WiFi接続に失敗しました"));
-    return false;
-  }
-  log_i("WiFi Connected :)");
-  Serial.println(F("Wifi接続に成功しました"));
-  log_i("SSID: %s\tLocal IP: %s", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
-  
-  file.close();
-  return true;
-  
-}
-*/
 
 /******************************************************************************************************************
 セットアップ
@@ -416,7 +366,7 @@ void webconfig() {
   
   Serial.println("Web設定モード: ");
 
-  configserver();
+  configserver(); //コンフィグサーバ関数呼び出し
   
   uint8_t configloop = 1;
   while (configloop == 1) {
@@ -491,7 +441,7 @@ String Headder_str() {
   html += "text-decoration: none;  margin: 4px 2px;";
   html += "</style>";
   html += "<body>"; 
-  html += "<h2>WIFIMGR</h2>";
+  html += "<h2>WiFiマネージャ</h2>";
   return html;
 }
 

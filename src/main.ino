@@ -166,6 +166,9 @@ void setup()
   myDFPlayer.playFolder(99, 7); //myDFPlayerのライブラリから、フォルダ番号指定、ファイル番号指定、10進数指定
   myDFPlayer.available();//dfplayerバッファ初期化 playFolderの直後に入れる
   delay(3000);//音声再生完了待ち
+
+  WiFi.disconnect(true);//wifi無効（省エネモード）
+
 }
 
 /****************************************************
@@ -220,7 +223,7 @@ void voiceplay(){
   Serial.print(timeInfo.tm_hour);
   Serial.println("時台です");
 
-    if (photoanalogValue > 3000){ //明るさ判定
+    if (photoanalogValue > 500){ //明るさ判定
       if (brighttimes < 1){//明るい継続判定0回なら処理
 
         sdfileco = myDFPlayer.readFileCountsInFolder(timeInfo.tm_hour);//当該時刻名のフォルダ内にあるファイル数を取得
@@ -266,7 +269,7 @@ void voiceplay(){
       Serial.println(F("明るさ継続回数"));
       Serial.println(brighttimes);
 
-    } else if(photoanalogValue < 3000) {//photologValueが基準値を下回ったら再生停止
+    } else if(photoanalogValue < 500) {//photologValueが基準値を下回ったら再生停止
       myDFPlayer.stop();
       brighttimes = 0;
       Serial.println(F("明るさ継続回数"));

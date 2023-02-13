@@ -416,13 +416,13 @@ String maskpasswd(String passwd){
 void wifimgr_top() {
 
   String html = Headder_str();
-  html += "<a href='/wifiinput'>WiFi設定開始</a>";
-  html += "<hr><h3>現在の設定</h3>";
+  html += "<a href='/wifiinput'>WiFi Setting Start</a>";
+  html += "<hr><h3>Current setting</h3>";
   html += "SSID: " + ssid + "<br>";
   html += "passwd: " + maskpasswd(passwd) + "<br>";
   //html += "WiFiによる時刻同期を使用しない<input type=\"checkbox\" name=\"hushiyou\" value=\"hushiyou\"><br>";
   // valueWiFiによる時刻同期を使用しない<br>";
-  html += "<hr><p><center><a href='/reboot'>設定を適用して再起動</a></center>";
+  html += "<hr><p><center><a href='/reboot'>Apply settings and reboot</a></center>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
@@ -444,7 +444,7 @@ String Headder_str() {
   html += "text-decoration: none;  margin: 4px 2px;";
   html += "</style>";
   html += "<body>"; 
-  html += "<h2>WiFiマネージャ</h2>";
+  html += "<h2>WiFi Manager</h2>";
   return html;
 }
 
@@ -499,11 +499,11 @@ void readConfigFile(){
 
 void wifiinput() {
   String html = Headder_str();
-  html += "<a href='/'>設定メニューへ戻る</a> ";
+  html += "<a href='/'>Back to Setting Menu</a> ";
   html += "<hr><p>";
-  html += "<h3>WiFiアクセスポイント設定</h3>";
+  html += "<h3>WiFi Access Point Settings</h3>";
   html += WIFI_Form_str();
-  html += "<br><hr><p><center><a href='/'>キャンセル</a></center>";
+  html += "<br><hr><p><center><a href='/'>Cancel</a></center>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
 }
@@ -545,7 +545,7 @@ String WIFI_Form_str(){
   }
   str += "</select><br>\r\n";
   str += "Password<br><input type='password' name='passwd' value='" + passwd + "'>";
-  str += "<br><input type='submit' value='設定'>";
+  str += "<br><input type='submit' value='apply'>";
   str += "</form><br>";
   str += "<script>document.getElementById('ssid').value = '"+ ssid +"';</script>";
   return str;
@@ -569,9 +569,9 @@ void wifiset(){
 void reboot() {
   String html = Headder_str();
   html += "<hr><p>";
-  html += "<h3>再起動実行確認</h3><p>";
-  html += "再起動してよろしいですか?<p>";
-  html += "<center><a href='/doreboot'>はい</a> <a href='/'>いいえ</a></center>";
+  html += "<h3>Confirmation of reboot execution</h3><p>";
+  html += "Are you sure you want to reboot?<p>";
+  html += "<center><a href='/doreboot'>YES</a> <a href='/'>NO</a></center>";
   html += "<p><hr>";
   html += "</body></html>";
   webServer.send(200, "text/html", html);
@@ -580,7 +580,7 @@ void reboot() {
 void doreboot() {
   String html = Headder_str();
   html += "<hr><p>";
-  html += "<h3>再起動中</h3><p>";
+  html += "<h3>Rebooting...</h3><p>";
   html += "The setting WiFi connection will be disconnected...<p>";
   html += "<hr>";
   html += "</body></html>";
